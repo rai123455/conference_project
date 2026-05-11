@@ -2,6 +2,7 @@ package com.journal.backend.repository;
 
 import com.journal.backend.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import java.util.List;
 import java.util.Optional;
 
 // JpaRepository<User, Long> означает:
@@ -13,5 +14,11 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
 
     // SELECT * FROM users WHERE role = ?
-    java.util.List<User> findByRole(String role);
+//    java.util.List<User> findByRole(String role);
+
+    // Найти председателей по факультету
+    List<User> findByRoleAndFaculty(String role, String faculty);
+
+    // Все председатели
+    List<User> findByRole(String role);
 }

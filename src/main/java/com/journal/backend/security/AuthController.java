@@ -41,11 +41,13 @@ public class AuthController {
         // Генерируем токен и возвращаем
         String token = jwtUtil.generateToken(user.getEmail(), user.getRole());
 
+
         return Map.of(
                 "token", token,
                 "role", user.getRole(),
                 "name", user.getName(),
-                "id", String.valueOf(user.getId())
+                "id", String.valueOf(user.getId()),
+                "faculty", user.getFaculty() != null ? user.getFaculty() : ""
         );
     }
 }

@@ -36,6 +36,46 @@ public class Article {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @Column(name = "file_path")
+    private String filePath;
+
+    @Column
+    private String faculty;  // факультет статьи
+
+    @Column(name = "chair_decision")
+    private String chairDecision;  // решение председателя
+
+    @Column(name = "chair_comment")
+    private String chairComment;   // комментарий председателя
+
+    // Три рецензента
+    @ManyToOne
+    @JoinColumn(name = "reviewer2_id")
+    private User reviewer2;
+
+    @ManyToOne
+    @JoinColumn(name = "reviewer3_id")
+    private User reviewer3;
+
+    // Геттеры и сеттеры
+    public String getFaculty() { return faculty; }
+    public void setFaculty(String faculty) { this.faculty = faculty; }
+
+    public String getChairDecision() { return chairDecision; }
+    public void setChairDecision(String chairDecision) { this.chairDecision = chairDecision; }
+
+    public String getChairComment() { return chairComment; }
+    public void setChairComment(String chairComment) { this.chairComment = chairComment; }
+
+    public User getReviewer2() { return reviewer2; }
+    public void setReviewer2(User reviewer2) { this.reviewer2 = reviewer2; }
+
+    public User getReviewer3() { return reviewer3; }
+    public void setReviewer3(User reviewer3) { this.reviewer3 = reviewer3; }
+
+    public String getFilePath() { return filePath; }
+    public void setFilePath(String filePath) { this.filePath = filePath; }
+
     // Геттеры и сеттеры (правая кнопка → Generate → Getters and Setters)
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }

@@ -8,4 +8,10 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 
     // Все рецензии на конкретную статью
     List<Review> findByArticleId(Long articleId);
+
+    // Все рецензии на статью
+    List<Review> findByArticleIdOrderByReviewerNumber(Long articleId);
+
+    // Количество рецензий на статью
+    long countByArticleId(Long articleId);
 }

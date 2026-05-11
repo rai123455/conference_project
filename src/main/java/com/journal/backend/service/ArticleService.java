@@ -89,26 +89,27 @@ public class ArticleService {
         User reviewer = userRepository.findById(request.getReviewerId())
                 .orElseThrow(() -> new RuntimeException("Рецензент не найден"));
 
-        // Сохраняем рецензию
+        // Определяем номер рецензента
+        int reviewerNumber = 1;
+        if (article.getReviewer2() != null &&
+                article.getReviewer2().getId().equals(request.getReviewerId())) {
+            reviewerNumber = 2;
+        } else if (article.getReviewer3() != null &&
+                article.getReviewer3().getId().equals(request.getReviewerId())) {
+            reviewerNumber = 3;
+        }
+
         Review review = new Review();
         review.setArticle(article);
         review.setReviewer(reviewer);
         review.setVerdict(request.getVerdict());
         review.setComment(request.getComment());
+        review.setReviewerNumber(reviewerNumber);
         review.setCreatedAt(LocalDateTime.now());
         reviewRepository.save(review);
 
-        // Меняем статус статьи в зависимости от решения
-        if (request.getVerdict().equals("ACCEPTED")) {
-            article.setStatus("PUBLISHED");    // статья опубликована
-        } else if (request.getVerdict().equals("REJECTED")) {
-            article.setStatus("REJECTED");
-        } else {
-            article.setStatus("REVISION");     // отправлена на доработку
-        }
-
-        article.setUpdatedAt(LocalDateTime.now());
-        articleRepository.save(article);
+        // Статус меняет только председатель — рецензент только оставляет отзыв
+        // Статус остаётся UNDER_REVIEW пока председатель не примет решение
 
         return review;
     }
@@ -137,6 +138,11 @@ public class ArticleService {
 
     // ── Получить статьи назначенные рецензенту ────────────────────────
     public List<Article> getArticlesForReviewer(Long reviewerId) {
-        return articleRepository.findByReviewerIdAndStatus(reviewerId, "UNDER_REVIEW");
+        return articleRepository.findByAnyReviewerAndStatus(reviewerId);
     }
+
+//    public List<Article> getArticlesForReviewer(Long reviewerId) {
+//        return articleRepository.findByReviewerIdAndStatus(reviewerId, "UNDER_REVIEW");
+//    }
+
 }

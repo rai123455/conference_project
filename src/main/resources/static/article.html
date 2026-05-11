@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Статья — Journal</title>
+    <title>Статья — Conference KTMU </title>
     <link rel="stylesheet" href="css/style.css">
     <style>
         .article-hero {
@@ -11,7 +11,6 @@
             color: white;
             padding: 3rem 0;
         }
-
         .article-hero .topic-tag {
             background: #e94560;
             color: white;
@@ -22,32 +21,24 @@
             display: inline-block;
             margin-bottom: 1rem;
         }
-
         .article-hero h1 {
             font-size: 2rem;
             line-height: 1.4;
             margin-bottom: 1rem;
             max-width: 800px;
         }
-
-        .article-hero .meta {
-            color: #aaa;
-            font-size: 0.9rem;
-        }
-
+        .article-hero .meta { color: #aaa; font-size: 0.9rem; }
         .article-body {
             max-width: 800px;
             margin: 2.5rem auto;
             padding: 0 1.5rem;
         }
-
         .article-body p {
             font-size: 1.05rem;
             line-height: 1.9;
             color: #333;
             white-space: pre-wrap;
         }
-
         .back-btn {
             display: inline-flex;
             align-items: center;
@@ -58,15 +49,8 @@
             margin-bottom: 2rem;
             transition: gap 0.2s;
         }
-
         .back-btn:hover { gap: 0.8rem; }
-
-        .divider {
-            border: none;
-            border-top: 2px solid #f0f0f0;
-            margin: 2rem 0;
-        }
-
+        .divider { border: none; border-top: 2px solid #f0f0f0; margin: 2rem 0; }
         .author-block {
             display: flex;
             align-items: center;
@@ -76,7 +60,6 @@
             border-radius: 12px;
             margin-top: 2rem;
         }
-
         .author-avatar {
             width: 48px;
             height: 48px;
@@ -90,26 +73,39 @@
             justify-content: center;
             flex-shrink: 0;
         }
-
-        .loading {
-            text-align: center;
-            padding: 4rem;
-            color: #888;
-            font-size: 1.1rem;
+        .loading { text-align: center; padding: 4rem; color: #888; font-size: 1.1rem; }
+        .pdf-open-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.8rem;
+            padding: 1rem 2rem;
+            background: #eff6ff;
+            border: 2px solid #bfdbfe;
+            border-radius: 12px;
+            color: #1e40af;
+            font-weight: 700;
+            font-size: 1rem;
+            text-decoration: none;
+            transition: all 0.2s;
+            margin: 1rem 0 2rem 0;
+        }
+        .pdf-open-btn:hover {
+            background: #dbeafe;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(59,130,246,0.2);
         }
     </style>
 </head>
 <body>
 
 <nav>
-    <a href="published.html" class="logo">📰 Journal</a>
+    <a href="published.html" class="logo">📰 Conference KTMU
     <div class="nav-links">
         <a href="published.html">← Все статьи</a>
         <a href="login.html">Войти</a>
     </div>
 </nav>
 
-<!-- Заголовок статьи -->
 <div class="article-hero" id="articleHero" style="display:none;">
     <div class="container">
         <span class="topic-tag" id="articleTopic"></span>
@@ -120,13 +116,16 @@
     </div>
 </div>
 
-<!-- Тело статьи -->
 <div class="article-body">
     <div id="loadingState" class="loading">Загрузка статьи...</div>
+
     <div id="articleContent" style="display:none;">
         <a href="published.html" class="back-btn">← Назад к статьям</a>
         <hr class="divider">
-        <p id="articleText"></p>
+
+        <!-- Сюда вставляется либо PDF кнопка, либо текст -->
+        <div id="articleBody"></div>
+
         <hr class="divider">
         <div class="author-block">
             <div class="author-avatar" id="authorAvatar"></div>
@@ -136,6 +135,7 @@
             </div>
         </div>
     </div>
+
     <div id="errorState" style="display:none; text-align:center; padding:4rem; color:#888;">
         <div style="font-size:3rem; margin-bottom:1rem;">😕</div>
         <p>Статья не найдена</p>
@@ -144,39 +144,45 @@
 </div>
 
 <script>
-    // Берём id статьи из URL: article.html?id=3
     const params = new URLSearchParams(window.location.search);
     const articleId = params.get('id');
 
     async function loadArticle() {
-        if (!articleId) {
-            showError();
-            return;
-        }
+        if (!articleId) { showError(); return; }
 
         try {
-            const res = await fetch(`http://localhost:8080/api/articles/published`);
+<!--            const res = await fetch('http://localhost:8080/api/articles/published');-->
+            const res = await fetch('${window.location.origin}/api');
             const articles = await res.json();
-
-            // Находим нужную статью по id
             const article = articles.find(a => a.id == articleId);
 
-            if (!article) {
-                showError();
-                return;
-            }
+            if (!article) { showError(); return; }
 
-            // Заполняем страницу данными
             document.title = article.title + ' — Journal';
-
             document.getElementById('articleTopic').textContent = article.topic || 'Без темы';
             document.getElementById('articleTitle').textContent = article.title;
             document.getElementById('articleAuthor').textContent = article.author.name;
-            document.getElementById('articleText').textContent = article.content;
             document.getElementById('authorName').textContent = article.author.name;
             document.getElementById('authorAvatar').textContent = article.author.name[0].toUpperCase();
 
-            // Показываем контент
+            // Если есть PDF — показываем кнопку, иначе текст
+            const bodyEl = document.getElementById('articleBody');
+            if (article.filePath) {
+                bodyEl.innerHTML = `
+                    <p style="color:#555; margin-bottom:1rem;">
+                        Эта статья доступна в формате PDF. Нажмите кнопку ниже чтобы открыть:
+                    </p>
+<!--                    <a href="http://localhost:8080/api/articles/${article.id}/file"-->
+                    <a href="${window.location.origin}/api"
+                       target="_blank"
+                       class="pdf-open-btn">
+                        📄 Открыть полную статью в PDF
+                    </a>
+                `;
+            } else {
+                bodyEl.innerHTML = `<p>${article.content}</p>`;
+            }
+
             document.getElementById('loadingState').style.display = 'none';
             document.getElementById('articleHero').style.display = 'block';
             document.getElementById('articleContent').style.display = 'block';

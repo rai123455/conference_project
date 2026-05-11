@@ -27,6 +27,12 @@ public class Review {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
+    @Column(name = "reviewer_number")
+    private Integer reviewerNumber;
+
+    public Integer getReviewerNumber() { return reviewerNumber; }
+    public void setReviewerNumber(Integer reviewerNumber) { this.reviewerNumber = reviewerNumber; }
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 

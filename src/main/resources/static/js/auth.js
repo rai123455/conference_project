@@ -1,10 +1,17 @@
 // Сохранить данные после логина
-function saveAuth(token, role, name, id) {
+function saveAuth(token, role, name, id, faculty) {
     localStorage.setItem('token', token);
     localStorage.setItem('role', role);
     localStorage.setItem('name', name);
     localStorage.setItem('userId', id);
+    localStorage.setItem('faculty', faculty || '');
 }
+//function saveAuth(token, role, name, id) {
+//    localStorage.setItem('token', token);
+//    localStorage.setItem('role', role);
+//    localStorage.setItem('name', name);
+//    localStorage.setItem('userId', id);
+//}
 
 // Выйти из аккаунта
 function logout() {

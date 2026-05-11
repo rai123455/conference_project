@@ -23,36 +23,6 @@ public class SecurityConfig {
     @Autowired
     private JwtFilter jwtFilter;
 
-//    @Bean
-//    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-//        http
-//                .csrf(csrf -> csrf.disable()) // отключаем CSRF — не нужен для REST API
-//                .sessionManagement(session ->
-//                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // без сессий — используем JWT
-//                .authorizeHttpRequests(auth -> auth
-//
-//                        // Эти эндпоинты открыты для всех — логин и регистрация
-//                        .requestMatchers("/api/users/register", "/api/auth/login").permitAll()
-//
-//                        // Только ADMIN может заходить в /api/admin/**
-//                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
-//
-//                        // Только REVIEWER может отправлять рецензии
-//                        .requestMatchers("/api/articles/submit-review").hasRole("REVIEWER")
-//
-//                        // Только AUTHOR может создавать статьи и отправлять доработки
-//                        .requestMatchers("/api/articles").hasRole("AUTHOR")
-//                        .requestMatchers("/api/articles/*/resubmit").hasRole("AUTHOR")
-//
-//                        // Все остальные запросы требуют авторизации (любой роли)
-//                        .anyRequest().authenticated()
-//                )
-//                // Добавляем наш JWT-фильтр перед стандартным фильтром Spring
-//                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
-//
-//        return http.build();
-//    }
-
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
@@ -66,7 +36,11 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/users/register").permitAll()
                         .requestMatchers("/api/articles/published").permitAll()
+                        .requestMatchers("/api/articles/*/file").permitAll()    // ← добавь
+                        .requestMatchers("/api/articles/upload").authenticated() // ← добавь
                         .requestMatchers("/api/articles/author/**").authenticated()
+
+                        .requestMatchers("/api/chair/**").hasRole("CHAIR") // для председателя
 
                         // Защищённые эндпоинты по ролям
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")

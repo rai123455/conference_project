@@ -3,28 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Панель администратора — Journal</title>
+    <title>Панель администратора — Conference KTMU</title>
     <link rel="stylesheet" href="../css/style.css">
     <style>
-        body { background: #f0f2f5; }
+        body { background: #f0f2f5; margin: 0; }
         .top-nav { background: #1a1a2e; padding: 0 2rem; display: flex; justify-content: space-between; align-items: center; height: 60px; position: sticky; top: 0; z-index: 100; }
         .top-nav .logo { color: #e94560; font-size: 1.3rem; font-weight: 800; text-decoration: none; }
         .top-nav .user-info { color: #ccc; font-size: 0.9rem; display: flex; align-items: center; gap: 1rem; }
         .top-nav .logout-btn { color: #e94560; cursor: pointer; font-weight: 600; background: none; border: none; font-size: 0.9rem; }
-        .layout { display: grid; grid-template-columns: 220px 1fr; min-height: calc(100vh - 60px); }
-        .sidebar { background: #1a1a2e; padding: 2rem 1rem; display: flex; flex-direction: column; gap: 0.3rem; }
+        .layout { display: flex; min-height: calc(100vh - 60px); }
+        .sidebar { background: #1a1a2e; padding: 2rem 1rem; display: flex; flex-direction: column; gap: 0.3rem; width: 220px; min-width: 220px; min-height: calc(100vh - 60px); height: calc(100vh - 60px); position: sticky; top: 60px; }
         .sidebar .user-block { text-align: center; padding-bottom: 1.5rem; margin-bottom: 0.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); }
         .sidebar .avatar { width: 56px; height: 56px; border-radius: 50%; background: #e94560; color: white; font-size: 1.4rem; font-weight: 700; display: flex; align-items: center; justify-content: center; margin: 0 auto 0.7rem; }
         .sidebar .user-name { color: white; font-weight: 600; font-size: 0.95rem; }
         .sidebar .user-role { color: #f59e0b; font-size: 0.8rem; margin-top: 0.2rem; font-weight: 600; }
-        .sidebar .menu-item { display: flex; align-items: center; gap: 0.8rem; padding: 0.75rem 1rem; color: #aaa; text-decoration: none; border-radius: 8px; cursor: pointer; border: none; background: none; width: 100%; font-size: 0.9rem; transition: all 0.2s; }
+        .sidebar .menu-item { display: flex; align-items: center; gap: 0.8rem; padding: 0.75rem 1rem; color: #aaa; text-decoration: none; border-radius: 8px; cursor: pointer; border: none; background: none; width: 100%; font-size: 0.9rem; transition: all 0.2s; box-sizing: border-box; }
         .sidebar .menu-item:hover { background: rgba(255,255,255,0.08); color: white; }
         .sidebar .menu-item.active { background: #e94560; color: white; }
         .sidebar .menu-item .icon { font-size: 1.1rem; width: 20px; text-align: center; }
         .sidebar .logout-item { margin-top: auto; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1); }
         .sidebar .logout-item .menu-item { color: #e94560; }
         .sidebar .logout-item .menu-item:hover { background: rgba(233,69,96,0.15); }
-        .main { padding: 2rem; overflow-y: auto; }
+        .main { padding: 2rem; overflow-y: auto; flex: 1; }
         .main h2 { color: #1a1a2e; margin-bottom: 1.5rem; font-size: 1.4rem; }
         .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 2rem; }
         .stat-card { background: white; border-radius: 12px; padding: 1.2rem 1.5rem; box-shadow: 0 2px 12px rgba(0,0,0,0.07); display: flex; align-items: center; gap: 1rem; }
@@ -55,12 +55,16 @@
         .modal-actions { display: flex; gap: 1rem; }
         .empty-state { text-align: center; padding: 3rem; color: #888; }
         .empty-state .icon { font-size: 3rem; margin-bottom: 1rem; }
+        .pub-card { background: white; border-radius: 12px; padding: 1.2rem 1.5rem; box-shadow: 0 2px 12px rgba(0,0,0,0.07); margin-bottom: 1rem; border-left: 4px solid #22c55e; cursor: pointer; transition: transform 0.2s; }
+        .pub-card:hover { transform: translateY(-2px); }
+        .pub-card h3 { color: #1a1a2e; font-size: 1rem; margin-bottom: 0.4rem; }
+        .topic-tag { background: #fff0f3; color: #e94560; padding: 0.2rem 0.8rem; border-radius: 20px; font-size: 0.78rem; font-weight: 600; display: inline-block; margin-bottom: 0.6rem; }
     </style>
 </head>
 <body>
 
 <nav class="top-nav">
-    <a href="../published.html" class="logo">📰 Journal</a>
+    <a href="#" class="logo">📰 Conference KTMU</a>
     <div class="user-info">
         Привет, <span id="userName" style="color:white; font-weight:600;"></span>
         <button class="logout-btn" onclick="logout()">Выйти</button>
@@ -70,7 +74,7 @@
 <div class="layout">
     <div class="sidebar">
         <div class="user-block">
-            <div class="avatar">A</div>
+            <div class="avatar" id="avatarLetter">A</div>
             <div class="user-name" id="sidebarName"></div>
             <div class="user-role">⚙️ Администратор</div>
         </div>
@@ -81,9 +85,9 @@
         <button class="menu-item" id="btn-published" onclick="showSection('published')">
             <span class="icon">📰</span> Опубликованные
         </button>
-        <a href="../published.html" class="menu-item">
+        <button class="menu-item" id="btn-pub" onclick="showSection('allPublished')">
             <span class="icon">🌐</span> Все публикации
-        </a>
+        </button>
 
         <div class="logout-item">
             <button class="menu-item" onclick="logout()">
@@ -92,10 +96,9 @@
         </div>
     </div>
 
-    <!-- ГЛАВНЫЙ КОНТЕНТ — оба раздела внутри .main -->
     <div class="main">
 
-        <!-- Раздел: Входящие -->
+        <!-- Входящие статьи -->
         <div id="pending">
             <h2>📥 Входящие статьи</h2>
             <div class="stats-grid">
@@ -124,13 +127,19 @@
             <div id="pendingList"><p style="color:#888;">Загрузка...</p></div>
         </div>
 
-        <!-- Раздел: Опубликованные — ВНУТРИ .main рядом с pending -->
+        <!-- Опубликованные (управление) -->
         <div id="published" style="display:none;">
             <h2>📰 Опубликованные статьи</h2>
             <p style="color:#888; margin-bottom:1.5rem; font-size:0.9rem;">
                 Вы можете удалить любую статью если она содержит ошибки или нарушения
             </p>
             <div id="publishedList"><p style="color:#888;">Загрузка...</p></div>
+        </div>
+
+        <!-- Все публикации (просмотр) -->
+        <div id="allPublished" style="display:none;">
+            <h2>🌐 Все публикации</h2>
+            <div id="allPublishedList"><p style="color:#888;">Загрузка...</p></div>
         </div>
 
     </div>
@@ -141,9 +150,7 @@
     <div class="modal-box">
         <h3>Назначить рецензента</h3>
         <p style="color:#666; margin-bottom:1rem;">Статья: <strong id="modalTitle"></strong></p>
-        <p style="color:#888; font-size:0.85rem; margin-bottom:1rem;">
-            ℹ️ Данные автора будут скрыты от рецензента
-        </p>
+        <p style="color:#888; font-size:0.85rem; margin-bottom:1rem;">ℹ️ Данные автора будут скрыты от рецензента</p>
         <div class="form-group">
             <label>Выберите рецензента</label>
             <select id="reviewerSelect"></select>
@@ -160,43 +167,41 @@
 <script>
     requireAuth('ADMIN');
     showUserName();
-    document.getElementById('sidebarName').textContent = localStorage.getItem('name') || 'Админ';
+    const name = localStorage.getItem('name') || 'А';
+    document.getElementById('sidebarName').textContent = name;
+    document.getElementById('avatarLetter').textContent = name[0].toUpperCase();
 
     let currentArticleId = null;
 
-    // ── Переключение разделов ──────────────────────────
     function showSection(section) {
-        document.getElementById('pending').style.display = 'none';
-        document.getElementById('published').style.display = 'none';
-
-        document.getElementById('btn-pending').classList.remove('active');
-        document.getElementById('btn-published').classList.remove('active');
+        ['pending','published','allPublished'].forEach(s => document.getElementById(s).style.display = 'none');
+        ['btn-pending','btn-published','btn-pub'].forEach(b => document.getElementById(b).classList.remove('active'));
 
         document.getElementById(section).style.display = 'block';
-        document.getElementById('btn-' + section).classList.add('active');
+        const btnMap = { pending:'btn-pending', published:'btn-published', allPublished:'btn-pub' };
+        document.getElementById(btnMap[section]).classList.add('active');
 
         if (section === 'pending') loadPendingArticles();
         if (section === 'published') loadPublishedForAdmin();
+        if (section === 'allPublished') loadAllPublished();
     }
 
-    // ── Входящие статьи ────────────────────────────────
     async function loadPendingArticles() {
         const list = document.getElementById('pendingList');
         try {
             const articles = await getPendingArticles();
             document.getElementById('statPending').textContent = articles.length;
-
             try {
-                const res = await fetch('http://localhost:8080/api/articles/published');
-                const published = await res.json();
-                document.getElementById('statPublished').textContent = published.length;
+<!--                const res = await fetch('http://localhost:8080/api/articles/published');-->
+                const res = await fetch(`${window.location.origin}/api/articles/published`);
+                const pub = await res.json();
+                document.getElementById('statPublished').textContent = pub.length;
             } catch(e) {}
 
             if (articles.length === 0) {
                 list.innerHTML = `<div class="empty-state"><div class="icon">🎉</div><p>Все статьи проверены!</p></div>`;
                 return;
             }
-
             list.innerHTML = articles.map(a => `
                 <div class="article-item">
                     <div class="article-item-header">
@@ -208,31 +213,36 @@
                         ${a.topic ? '· 🏷️ ' + a.topic : ''}
                     </div>
                     <p style="color:#555; font-size:0.9rem; margin-bottom:1rem; line-height:1.6;">
-                        ${a.content.substring(0, 250)}...
+                        ${(a.content || '').substring(0, 250)}${a.content && a.content.length > 250 ? '...' : ''}
                     </p>
+                    ${a.filePath ? `
+<!--                        <a href="http://localhost:8080/api/articles/${a.id}/file" target="_blank"-->
+                        <a href="${window.location.origin}/api/articles/${a.id}/file" target="_blank"
+                           style="display:inline-flex; align-items:center; gap:0.4rem; color:#1e40af;
+                                  font-weight:600; font-size:0.9rem; text-decoration:none; margin-bottom:1rem;">
+                            📄 Открыть PDF статью
+                        </a><br>` : ''}
                     <button class="btn btn-primary" onclick="openModal(${a.id}, '${a.title.replace(/'/g, "\\'")}')">
                         Назначить рецензента →
                     </button>
                 </div>
             `).join('');
-        } catch (e) {
+        } catch(e) {
             list.innerHTML = '<p style="color:red;">Ошибка загрузки</p>';
         }
     }
 
-    // ── Опубликованные статьи ──────────────────────────
     async function loadPublishedForAdmin() {
         const list = document.getElementById('publishedList');
         list.innerHTML = '<p style="color:#888;">Загрузка...</p>';
         try {
-            const res = await fetch('http://localhost:8080/api/articles/published');
+<!--            const res = await fetch('http://localhost:8080/api/articles/published');-->
+            const res = await fetch(`${window.location.origin}/api/articles/published`);
             const articles = await res.json();
-
             if (articles.length === 0) {
                 list.innerHTML = `<div class="empty-state"><div class="icon">📭</div><p>Нет опубликованных статей</p></div>`;
                 return;
             }
-
             list.innerHTML = articles.map(a => `
                 <div class="article-item" style="border-left-color:#22c55e;">
                     <div class="article-item-header">
@@ -244,7 +254,7 @@
                         ${a.topic ? '· 🏷️ ' + a.topic : ''}
                     </div>
                     <p style="color:#555; font-size:0.9rem; margin-bottom:1rem; line-height:1.6;">
-                        ${a.content.substring(0, 250)}...
+                        ${(a.content || '').substring(0, 250)}...
                     </p>
                     <button onclick="deleteArticle(${a.id}, '${a.title.replace(/'/g, "\\'")}')"
                         style="padding:0.6rem 1.2rem; background:#ef4444; color:white; border:none;
@@ -258,26 +268,46 @@
         }
     }
 
-    // ── Удаление статьи ────────────────────────────────
-    async function deleteArticle(articleId, title) {
-        if (!confirm(`Удалить статью "${title}"?\n\nЭто действие нельзя отменить.`)) return;
+    async function loadAllPublished() {
+        const list = document.getElementById('allPublishedList');
+        list.innerHTML = '<p style="color:#888;">Загрузка...</p>';
         try {
-            const res = await fetch(`http://localhost:8080/api/admin/articles/${articleId}`, {
-                method: 'DELETE',
-                headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
-            });
-            if (res.ok) {
-                alert('🗑️ Статья успешно удалена');
-                loadPublishedForAdmin();
-            } else {
-                alert('Ошибка удаления');
+<!--            const res = await fetch('http://localhost:8080/api/articles/published');-->
+            const res = await fetch(`${window.location.origin}/api/articles/published`);
+            const articles = await res.json();
+            if (articles.length === 0) {
+                list.innerHTML = '<p style="color:#888; text-align:center;">Нет опубликованных статей</p>';
+                return;
             }
+            list.innerHTML = articles.map(a => `
+                <div class="pub-card" onclick="window.open('../article.html?id=${a.id}', '_blank')">
+                    <span class="topic-tag">${a.topic || 'Без темы'}</span>
+                    <h3>${a.title}</h3>
+                    <p style="color:#555; font-size:0.9rem; line-height:1.6;">${(a.content || '').substring(0, 150)}...</p>
+                    <div style="display:flex; justify-content:space-between; margin-top:0.5rem;">
+                        <span style="color:#888; font-size:0.82rem;">✅ Автор: ${a.author.name}</span>
+                        <span style="color:#e94560; font-weight:600; font-size:0.85rem;">Читать далее →</span>
+                    </div>
+                </div>
+            `).join('');
         } catch(e) {
-            alert('Ошибка: ' + e.message);
+            list.innerHTML = '<p style="color:red;">Ошибка загрузки</p>';
         }
     }
 
-    // ── Модальное окно ─────────────────────────────────
+    async function deleteArticle(articleId, title) {
+        if (!confirm(`Удалить статью "${title}"?\n\nЭто действие нельзя отменить.`)) return;
+        try {
+<!--            const res = await fetch(`http://localhost:8080/api/admin/articles/${articleId}`, {-->
+            const res = await fetch(`${window.location.origin}/api/admin/articles/${articleId}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+            });
+            if (res.ok) { alert('🗑️ Статья успешно удалена'); loadPublishedForAdmin(); }
+            else alert('Ошибка удаления');
+        } catch(e) { alert('Ошибка: ' + e.message); }
+    }
+
     async function openModal(articleId, title) {
         currentArticleId = articleId;
         document.getElementById('modalTitle').textContent = title;
@@ -285,12 +315,8 @@
         select.innerHTML = '<option>Загрузка...</option>';
         try {
             const reviewers = await getReviewers();
-            select.innerHTML = reviewers.map(r =>
-                `<option value="${r.id}">${r.name} (${r.email})</option>`
-            ).join('');
-        } catch (e) {
-            select.innerHTML = '<option>Ошибка загрузки</option>';
-        }
+            select.innerHTML = reviewers.map(r => `<option value="${r.id}">${r.name} (${r.email})</option>`).join('');
+        } catch(e) { select.innerHTML = '<option>Ошибка загрузки</option>'; }
         document.getElementById('modal').style.display = 'flex';
     }
 
@@ -306,9 +332,7 @@
             alert('✅ Рецензент назначен! Данные автора скрыты.');
             closeModal();
             loadPendingArticles();
-        } catch (e) {
-            alert('Ошибка: ' + e.message);
-        }
+        } catch(e) { alert('Ошибка: ' + e.message); }
     }
 
     loadPendingArticles();

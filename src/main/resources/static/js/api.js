@@ -1,5 +1,7 @@
 // Адрес бэкенда — один раз здесь, везде используем
-const API_URL = 'http://localhost:8080/api';
+const API_URL = `${window.location.origin}/api`;
+//const API_URL = 'http://localhost:8080/api';
+//const API_URL = 'https://ВАШ_АДРЕС.up.railway.app/api';
 
 // Получить токен из localStorage
 function getToken() {

@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Кабинет председателя — Conference KTMU</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        body { background: #f0f2f5; margin: 0; }
+        .top-nav { background: #1a1a2e; padding: 0 2rem; display: flex; justify-content: space-between; align-items: center; height: 60px; position: sticky; top: 0; z-index: 100; }
+        .top-nav .logo { color: #e94560; font-size: 1.3rem; font-weight: 800; text-decoration: none; }
+        .top-nav .user-info { color: #ccc; font-size: 0.9rem; display: flex; align-items: center; gap: 1rem; }
+        .top-nav .logout-btn { color: #e94560; cursor: pointer; font-weight: 600; background: none; border: none; font-size: 0.9rem; }
+        .layout { display: flex; min-height: calc(100vh - 60px); }
+        .sidebar { background: #1a1a2e; padding: 2rem 1rem; display: flex; flex-direction: column; gap: 0.3rem; width: 220px; min-width: 220px; min-height: calc(100vh - 60px); height: calc(100vh - 60px); position: sticky; top: 60px; }
+        .sidebar .user-block { text-align: center; padding-bottom: 1.5rem; margin-bottom: 0.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .sidebar .avatar { width: 56px; height: 56px; border-radius: 50%; background: #7c3aed; color: white; font-size: 1.4rem; font-weight: 700; display: flex; align-items: center; justify-content: center; margin: 0 auto 0.7rem; }
+        .sidebar .user-name { color: white; font-weight: 600; font-size: 0.95rem; }
+        .sidebar .user-role { color: #a78bfa; font-size: 0.8rem; margin-top: 0.2rem; font-weight: 600; }
+        .sidebar .faculty-badge { background: rgba(124,58,237,0.2); color: #a78bfa; padding: 0.3rem 0.7rem; border-radius: 8px; font-size: 0.75rem; margin-top: 0.5rem; text-align: center; line-height: 1.4; }
+        .sidebar .menu-item { display: flex; align-items: center; gap: 0.8rem; padding: 0.75rem 1rem; color: #aaa; text-decoration: none; border-radius: 8px; cursor: pointer; border: none; background: none; width: 100%; font-size: 0.9rem; transition: all 0.2s; box-sizing: border-box; }
+        .sidebar .menu-item:hover { background: rgba(255,255,255,0.08); color: white; }
+        .sidebar .menu-item.active { background: #7c3aed; color: white; }
+        .sidebar .menu-item .icon { font-size: 1.1rem; width: 20px; text-align: center; }
+        .sidebar .logout-item { margin-top: auto; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1); }
+        .sidebar .logout-item .menu-item { color: #e94560; }
+        .sidebar .logout-item .menu-item:hover { background: rgba(233,69,96,0.15); }
+        .badge-count { background: #e94560; color: white; border-radius: 20px; padding: 0.1rem 0.5rem; font-size: 0.75rem; font-weight: 700; }
+        .main { padding: 2rem; overflow-y: auto; flex: 1; }
+        .main h2 { color: #1a1a2e; margin-bottom: 1.5rem; font-size: 1.4rem; }
+        .article-item { background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 12px rgba(0,0,0,0.07); margin-bottom: 1.2rem; border-left: 4px solid #7c3aed; }
+        .article-item h3 { color: #1a1a2e; font-size: 1.05rem; margin-bottom: 0.5rem; }
+        .article-meta { color: #888; font-size: 0.85rem; margin-bottom: 1rem; }
+        .badge { padding: 0.25rem 0.7rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
+        .badge-pending { background: #fef3c7; color: #92400e; }
+        .badge-review { background: #dbeafe; color: #1e40af; }
+        .badge-published { background: #dcfce7; color: #166534; }
+        .badge-revision { background: #fee2e2; color: #991b1b; }
+        .badge-rejected { background: #f3f4f6; color: #374151; }
+        .btn { padding: 0.65rem 1.4rem; border: none; border-radius: 8px; cursor: pointer; font-size: 0.9rem; font-weight: 600; transition: all 0.2s; }
+        .btn-primary { background: #7c3aed; color: white; }
+        .btn-primary:hover { background: #6d28d9; }
+        .btn-accept { background: #22c55e; color: white; }
+        .btn-accept:hover { background: #16a34a; }
+        .btn-revision { background: #f59e0b; color: white; }
+        .btn-revision:hover { background: #d97706; }
+        .btn-reject { background: #ef4444; color: white; }
+        .btn-reject:hover { background: #dc2626; }
+        .btn-secondary { background: transparent; color: #7c3aed; border: 2px solid #7c3aed; }
+        .btn-secondary:hover { background: #7c3aed; color: white; }
+        .btn-read { background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; }
+        .btn-read:hover { background: #dbeafe; }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
+        .modal-box { background: white; padding: 2rem; border-radius: 16px; width: 90%; max-width: 600px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); max-height: 90vh; overflow-y: auto; }
+        .modal-box h3 { margin-bottom: 1rem; color: #1a1a2e; }
+        .form-group { margin-bottom: 1.2rem; }
+        .form-group label { display: block; margin-bottom: 0.4rem; font-weight: 600; color: #333; font-size: 0.9rem; }
+        .form-group select, .form-group textarea { width: 100%; padding: 0.75rem 1rem; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 0.95rem; font-family: inherit; box-sizing: border-box; }
+        .form-group select:focus, .form-group textarea:focus { outline: none; border-color: #7c3aed; }
+        .form-group textarea { min-height: 100px; resize: vertical; }
+        .modal-actions { display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 1.2rem; }
+        .review-card { background: #f8f9fa; border-radius: 10px; padding: 1rem; margin-bottom: 0.8rem; border-left: 3px solid #e0e0e0; }
+        .review-card.accepted { border-left-color: #22c55e; }
+        .review-card.revision { border-left-color: #f59e0b; }
+        .review-card.rejected { border-left-color: #ef4444; }
+        .empty-state { text-align: center; padding: 3rem; color: #888; }
+        .empty-state .icon { font-size: 3rem; margin-bottom: 1rem; }
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 2rem; }
+        .stat-card { background: white; border-radius: 12px; padding: 1.2rem; box-shadow: 0 2px 12px rgba(0,0,0,0.07); text-align: center; }
+        .stat-card .number { font-size: 1.8rem; font-weight: 700; color: #7c3aed; }
+        .stat-card .label { color: #888; font-size: 0.8rem; margin-top: 0.3rem; }
+        .content-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem 1.2rem; margin: 1rem 0; color: #334155; line-height: 1.7; font-size: 0.92rem; max-height: 300px; overflow-y: auto; }
+        .action-btns { display: flex; gap: 0.8rem; flex-wrap: wrap; margin-top: 1rem; }
+    </style>
+</head>
+<body>
+
+<nav class="top-nav">
+    <a href="#" class="logo">📰 Conference KTMU</a>
+    <div class="user-info">
+        Привет, <span id="userName" style="color:white; font-weight:600;"></span>
+        <button class="logout-btn" onclick="logout()">Выйти</button>
+    </div>
+</nav>
+
+<div class="layout">
+    <div class="sidebar">
+        <div class="user-block">
+            <div class="avatar" id="avatarLetter">П</div>
+            <div class="user-name" id="sidebarName"></div>
+            <div class="user-role">👑 Председатель</div>
+            <div class="faculty-badge" id="facultyBadge"></div>
+        </div>
+
+        <button class="menu-item active" id="btn-pending" onclick="showSection('pending')">
+            <span class="icon">📥</span>
+            <span>Входящие</span>
+            <span class="badge-count" id="pendingCount" style="display:none;"></span>
+        </button>
+        <button class="menu-item" id="btn-review" onclick="showSection('underReview')">
+            <span class="icon">🔍</span> На рецензии
+        </button>
+        <button class="menu-item" id="btn-decision" onclick="showSection('waitingDecision')">
+            <span class="icon">⚖️</span>
+            <span>Ждут решения</span>
+            <span class="badge-count" id="decisionCount" style="display:none;"></span>
+        </button>
+        <button class="menu-item" id="btn-all" onclick="showSection('allArticles')">
+            <span class="icon">📋</span> Все статьи
+        </button>
+        <button class="menu-item" id="btn-pub" onclick="showSection('allPublished')">
+            <span class="icon">🌐</span> Все публикации
+        </button>
+
+        <div class="logout-item">
+            <button class="menu-item" onclick="logout()">
+                <span class="icon">🚪</span> Выйти
+            </button>
+        </div>
+    </div>
+
+    <div class="main">
+
+        <!-- Входящие статьи -->
+        <div id="pending">
+            <h2>📥 Входящие статьи</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="number" id="statPending">0</div>
+                    <div class="label">Входящие</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number" id="statReview">0</div>
+                    <div class="label">На рецензии</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number" id="statPublished">0</div>
+                    <div class="label">Опубликовано</div>
+                </div>
+            </div>
+            <div id="pendingList"><p style="color:#888;">Загрузка...</p></div>
+        </div>
+
+        <!-- На рецензировании -->
+        <div id="underReview" style="display:none;">
+            <h2>🔍 Статьи на рецензировании</h2>
+            <div id="reviewList"><p style="color:#888;">Загрузка...</p></div>
+        </div>
+
+        <!-- Ждут решения председателя -->
+        <div id="waitingDecision" style="display:none;">
+            <h2>⚖️ Ждут вашего решения</h2>
+            <p style="color:#888; margin-bottom:1.5rem; font-size:0.9rem;">
+                Все три рецензента оставили отзывы. Примите финальное решение.
+            </p>
+            <div id="decisionList"><p style="color:#888;">Загрузка...</p></div>
+        </div>
+
+        <!-- Все статьи факультета -->
+        <div id="allArticles" style="display:none;">
+            <h2>📋 Все статьи факультета</h2>
+            <div id="allList"><p style="color:#888;">Загрузка...</p></div>
+        </div>
+
+        <!-- Все публикации -->
+        <div id="allPublished" style="display:none;">
+            <h2>🌐 Все публикации</h2>
+            <div id="publishedList"><p style="color:#888;">Загрузка...</p></div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Модальное окно: назначить трёх рецензентов -->
+<div class="modal-overlay" id="assignModal">
+    <div class="modal-box">
+        <h3>Назначить трёх рецензентов</h3>
+        <p style="color:#666; margin-bottom:1rem;">Статья: <strong id="assignModalTitle"></strong></p>
+        <p style="color:#888; font-size:0.85rem; margin-bottom:1rem;">
+            ℹ️ Данные автора будут скрыты от рецензентов (слепое рецензирование)
+        </p>
+        <div class="form-group">
+            <label>Рецензент 1</label>
+            <select id="reviewer1Select"></select>
+        </div>
+        <div class="form-group">
+            <label>Рецензент 2</label>
+            <select id="reviewer2Select"></select>
+        </div>
+        <div class="form-group">
+            <label>Рецензент 3</label>
+            <select id="reviewer3Select"></select>
+        </div>
+        <div class="modal-actions">
+            <button class="btn btn-primary" onclick="confirmAssignThree()">Назначить рецензентов</button>
+            <button class="btn btn-secondary" onclick="closeAssignModal()">Отмена</button>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно: читать статью -->
+<div class="modal-overlay" id="readModal">
+    <div class="modal-box" style="max-width:700px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+            <h3 id="readModalTitle" style="margin:0;"></h3>
+            <button onclick="closeReadModal()" style="background:none; border:none; font-size:1.5rem; cursor:pointer; color:#888;">✕</button>
+        </div>
+        <div style="color:#888; font-size:0.85rem; margin-bottom:1rem;" id="readModalMeta"></div>
+        <div id="readModalContent"></div>
+    </div>
+</div>
+
+<!-- Модальное окно: финальное решение председателя -->
+<div class="modal-overlay" id="decisionModal">
+    <div class="modal-box">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+            <h3 style="margin:0;">⚖️ Финальное решение</h3>
+            <button onclick="closeDecisionModal()" style="background:none; border:none; font-size:1.5rem; cursor:pointer; color:#888;">✕</button>
+        </div>
+        <p style="color:#666; margin-bottom:1rem;">Статья: <strong id="decisionModalTitle"></strong></p>
+        <div id="reviewsSummary" style="margin-bottom:1rem;"></div>
+        <div class="form-group">
+            <label>Ваш комментарий автору</label>
+            <textarea id="chairComment" placeholder="Напишите комментарий для автора..."></textarea>
+        </div>
+        <div class="modal-actions">
+            <button class="btn btn-accept" onclick="confirmDecision('ACCEPTED')">✅ Принять</button>
+            <button class="btn btn-revision" onclick="confirmDecision('REVISION')">✏️ На доработку</button>
+            <button class="btn btn-reject" onclick="confirmDecision('REJECTED')">❌ Отклонить</button>
+            <button class="btn btn-secondary" onclick="closeDecisionModal()">Отмена</button>
+        </div>
+    </div>
+</div>
+
+<script src="../js/api.js"></script>
+<script src="../js/auth.js"></script>
+<script>
+    requireAuth('CHAIR');
+    showUserName();
+
+    const name = localStorage.getItem('name') || 'П';
+    const faculty = localStorage.getItem('faculty') || '';
+    document.getElementById('sidebarName').textContent = name;
+    document.getElementById('avatarLetter').textContent = name[0].toUpperCase();
+    document.getElementById('facultyBadge').textContent = faculty;
+
+    const API = 'http://localhost:8080/api';
+    const token = () => localStorage.getItem('token');
+    const hdrs = () => ({ 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token() });
+
+    let currentArticleId = null;
+    let currentReviews = [];
+    let reviewers = [];
+
+    // ── Переключение разделов ──────────────────────────
+    function showSection(section) {
+        ['pending','underReview','waitingDecision','allArticles','allPublished']
+            .forEach(s => document.getElementById(s).style.display = 'none');
+        ['btn-pending','btn-review','btn-decision','btn-all','btn-pub']
+            .forEach(b => document.getElementById(b).classList.remove('active'));
+
+        document.getElementById(section).style.display = 'block';
+        const btnMap = {
+            pending: 'btn-pending', underReview: 'btn-review',
+            waitingDecision: 'btn-decision', allArticles: 'btn-all',
+            allPublished: 'btn-pub'
+        };
+        document.getElementById(btnMap[section]).classList.add('active');
+
+        if (section === 'pending') loadPending();
+        if (section === 'underReview') loadUnderReview();
+        if (section === 'waitingDecision') loadWaitingDecision();
+        if (section === 'allArticles') loadAllArticles();
+        if (section === 'allPublished') loadAllPublished();
+    }
+
+    // ── Загрузить рецензентов ──────────────────────────
+    async function loadReviewers() {
+        const res = await fetch(`${API}/chair/reviewers`, { headers: hdrs() });
+        reviewers = await res.json();
+    }
+
+    function fillReviewerSelects() {
+        const opts = reviewers.map(r =>
+            `<option value="${r.id}">${r.name} (${r.email})</option>`
+        ).join('');
+        ['reviewer1Select','reviewer2Select','reviewer3Select']
+            .forEach(id => document.getElementById(id).innerHTML = opts);
+    }
+
+    // ── Читать статью ──────────────────────────────────
+    function openReadModal(article) {
+        document.getElementById('readModalTitle').textContent = article.title;
+        document.getElementById('readModalMeta').textContent =
+            `🏷️ Тема: ${article.topic || 'не указана'} · 🏛️ ${article.faculty || ''}`;
+
+        const contentDiv = document.getElementById('readModalContent');
+
+        if (article.filePath) {
+            contentDiv.innerHTML = `
+                <a href="${API}/articles/${article.id}/file" target="_blank"
+                   style="display:inline-flex; align-items:center; gap:0.7rem;
+                          padding:1rem 1.5rem; background:#eff6ff; border:1px solid #bfdbfe;
+                          border-radius:10px; color:#1e40af; font-weight:600;
+                          text-decoration:none; margin-bottom:1rem;">
+                    📄 Открыть полный PDF
+                </a>`;
+        } else {
+            contentDiv.innerHTML = `
+                <div class="content-box">${article.content || 'Содержимое недоступно'}</div>`;
+        }
+
+        document.getElementById('readModal').style.display = 'flex';
+    }
+
+    function closeReadModal() {
+        document.getElementById('readModal').style.display = 'none';
+    }
+
+    // ── Входящие статьи ────────────────────────────────
+    async function loadPending() {
+        const list = document.getElementById('pendingList');
+        try {
+            const res = await fetch(
+                `${API}/chair/articles/pending?faculty=${encodeURIComponent(faculty)}`,
+                { headers: hdrs() }
+            );
+            const articles = await res.json();
+
+            document.getElementById('statPending').textContent = articles.length;
+            if (articles.length > 0) {
+                document.getElementById('pendingCount').textContent = articles.length;
+                document.getElementById('pendingCount').style.display = 'inline-block';
+            }
+
+            if (articles.length === 0) {
+                list.innerHTML = `<div class="empty-state"><div class="icon">🎉</div><p>Нет входящих статей</p></div>`;
+                return;
+            }
+
+            // Сохраняем статьи в глобальный объект для доступа из кнопок
+            window._pendingArticles = {};
+            articles.forEach(a => window._pendingArticles[a.id] = a);
+
+            list.innerHTML = articles.map(a => `
+                <div class="article-item">
+                    <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:0.5rem;">
+                        <h3>${a.title}</h3>
+                        <span class="badge badge-pending">⏳ Ожидает</span>
+                    </div>
+                    <div class="article-meta">
+                        🏷️ Тема: ${a.topic || 'не указана'} · 🏛️ ${a.faculty || ''}
+                    </div>
+                    <p style="color:#555; font-size:0.9rem; margin-bottom:1rem; line-height:1.6;">
+                        ${(a.content || '').substring(0, 150)}${(a.content || '').length > 150 ? '...' : ''}
+                    </p>
+                    <div class="action-btns">
+                        <button class="btn btn-read" onclick="openReadModal(window._pendingArticles[${a.id}])">
+                            👁️ Читать статью
+                        </button>
+                        <button class="btn btn-primary" onclick="openAssignModal(${a.id}, '${a.title.replace(/'/g, "\\'")}')">
+                            Назначить 3 рецензентов →
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        } catch(e) {
+            list.innerHTML = '<p style="color:red;">Ошибка загрузки</p>';
+            console.error(e);
+        }
+    }
+
+    // ── Статьи на рецензировании ───────────────────────
+    async function loadUnderReview() {
+        const list = document.getElementById('reviewList');
+        try {
+            const res = await fetch(
+                `${API}/chair/articles/under-review?faculty=${encodeURIComponent(faculty)}`,
+                { headers: hdrs() }
+            );
+            const articles = await res.json();
+
+            document.getElementById('statReview').textContent = articles.length;
+
+            if (articles.length === 0) {
+                list.innerHTML = `<div class="empty-state"><div class="icon">📋</div><p>Нет статей на рецензировании</p></div>`;
+                return;
+            }
+
+            window._reviewArticles = {};
+            articles.forEach(a => window._reviewArticles[a.id] = a);
+
+            list.innerHTML = articles.map(a => `
+                <div class="article-item" style="border-left-color:#3b82f6;">
+                    <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:0.5rem;">
+                        <h3>${a.title}</h3>
+                        <span class="badge badge-review">🔍 На рецензии</span>
+                    </div>
+                    <div class="article-meta">🏷️ Тема: ${a.topic || 'не указана'}</div>
+                    <div style="margin-top:0.8rem; font-size:0.85rem; color:#555; margin-bottom:1rem;">
+                        <strong>Назначены:</strong>
+                        ${a.reviewer ? ' 👤 ' + a.reviewer.name : ''}
+                        ${a.reviewer2 ? ' · 👤 ' + a.reviewer2.name : ''}
+                        ${a.reviewer3 ? ' · 👤 ' + a.reviewer3.name : ''}
+                    </div>
+                    <button class="btn btn-read" onclick="openReadModal(window._reviewArticles[${a.id}])">
+                        👁️ Читать статью
+                    </button>
+                </div>
+            `).join('');
+        } catch(e) {
+            list.innerHTML = '<p style="color:red;">Ошибка загрузки</p>';
+        }
+    }
+
+    // ── Ждут решения председателя ──────────────────────
+    async function loadWaitingDecision() {
+        const list = document.getElementById('decisionList');
+        list.innerHTML = '<p style="color:#888;">Загрузка...</p>';
+        try {
+            const allRes = await fetch(
+                `${API}/chair/articles/all?faculty=${encodeURIComponent(faculty)}`,
+                { headers: hdrs() }
+            );
+            const allArticles = await allRes.json();
+
+            const waiting = [];
+            for (const a of allArticles) {
+                if (a.status === 'UNDER_REVIEW') {
+                    const revRes = await fetch(
+                        `${API}/chair/articles/${a.id}/reviews`,
+                        { headers: hdrs() }
+                    );
+                    const reviews = await revRes.json();
+                    if (reviews.length >= 3) waiting.push({ article: a, reviews });
+                }
+            }
+
+            if (waiting.length > 0) {
+                document.getElementById('decisionCount').textContent = waiting.length;
+                document.getElementById('decisionCount').style.display = 'inline-block';
+            }
+
+            if (waiting.length === 0) {
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <div class="icon">⏳</div>
+                        <p>Нет статей ожидающих решения</p>
+                        <p style="font-size:0.85rem; margin-top:0.5rem;">Рецензенты ещё не завершили проверку</p>
+                    </div>`;
+                return;
+            }
+
+            // Сохраняем для доступа из кнопок
+            window._waitingData = {};
+            waiting.forEach(({ article, reviews }) => {
+                window._waitingData[article.id] = { article, reviews };
+            });
+
+            list.innerHTML = waiting.map(({ article: a, reviews }) => `
+                <div class="article-item" style="border-left-color:#f59e0b;">
+                    <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:0.5rem;">
+                        <h3>${a.title}</h3>
+                        <span class="badge" style="background:#fef3c7; color:#92400e;">⚖️ Ждёт решения</span>
+                    </div>
+                    <div class="article-meta">🏷️ Тема: ${a.topic || 'не указана'}</div>
+
+                    <!-- Решения рецензентов -->
+                    <div style="margin:1rem 0;">
+                        <strong style="font-size:0.9rem; color:#333; display:block; margin-bottom:0.5rem;">
+                            Решения рецензентов:
+                        </strong>
+                        ${reviews.map((r, i) => `
+                            <div class="review-card ${(r.verdict || '').toLowerCase()}">
+                                <div style="display:flex; justify-content:space-between; margin-bottom:0.3rem;">
+                                    <span style="font-weight:600; font-size:0.85rem;">
+                                        👤 ${r.reviewer ? r.reviewer.name : 'Рецензент ' + (i+1)}
+                                    </span>
+                                    <span class="badge ${getVerdictBadge(r.verdict)}">${getVerdictText(r.verdict)}</span>
+                                </div>
+                                <p style="color:#555; font-size:0.85rem; margin:0;">${r.comment || 'Без комментария'}</p>
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <div class="action-btns">
+                        <button class="btn btn-read" onclick="openReadModal(window._waitingData[${a.id}].article)">
+                            👁️ Читать статью
+                        </button>
+                        <button class="btn btn-primary" onclick="openDecisionModal(${a.id})">
+                            ⚖️ Принять решение →
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        } catch(e) {
+            list.innerHTML = '<p style="color:red;">Ошибка загрузки</p>';
+            console.error(e);
+        }
+    }
+
+    // ── Все статьи факультета ──────────────────────────
+    async function loadAllArticles() {
+        const list = document.getElementById('allList');
+        try {
+            const res = await fetch(
+                `${API}/chair/articles/all?faculty=${encodeURIComponent(faculty)}`,
+                { headers: hdrs() }
+            );
+            const articles = await res.json();
+
+            if (articles.length === 0) {
+                list.innerHTML = `<div class="empty-state"><div class="icon">📭</div><p>Нет статей</p></div>`;
+                return;
+            }
+
+            window._allArticles = {};
+            articles.forEach(a => window._allArticles[a.id] = a);
+
+            list.innerHTML = articles.map(a => `
+                <div class="article-item" style="border-left-color:${getStatusColor(a.status)};">
+                    <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:0.5rem;">
+                        <h3>${a.title}</h3>
+                        <span class="badge ${getStatusBadge(a.status)}">${getStatusText(a.status)}</span>
+                    </div>
+                    <div class="article-meta">🏷️ Тема: ${a.topic || 'не указана'}</div>
+                    ${a.chairComment ? `
+                        <div style="background:#f0fdf4; border:1px solid #86efac; border-radius:8px;
+                                    padding:0.8rem; margin-top:0.8rem; font-size:0.85rem;">
+                            <strong>Ваш комментарий:</strong> ${a.chairComment}
+                        </div>` : ''}
+                    <div class="action-btns">
+                        <button class="btn btn-read" onclick="openReadModal(window._allArticles[${a.id}])">
+                            👁️ Читать статью
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        } catch(e) {
+            list.innerHTML = '<p style="color:red;">Ошибка загрузки</p>';
+        }
+    }
+
+    // ── Все публикации ─────────────────────────────────
+    async function loadAllPublished() {
+        const list = document.getElementById('publishedList');
+        try {
+            const res = await fetch(`${API}/articles/published`);
+            const articles = await res.json();
+            if (articles.length === 0) {
+                list.innerHTML = '<p style="color:#888; text-align:center;">Нет опубликованных статей</p>';
+                return;
+            }
+            list.innerHTML = articles.map(a => `
+                <div style="background:white; border-radius:12px; padding:1.2rem 1.5rem;
+                            box-shadow:0 2px 12px rgba(0,0,0,0.07); margin-bottom:1rem;
+                            border-left:4px solid #22c55e; cursor:pointer;"
+                     onclick="window.open('../article.html?id=${a.id}', '_blank')">
+                    <h3 style="color:#1a1a2e; margin-bottom:0.4rem;">${a.title}</h3>
+                    <p style="color:#555; font-size:0.9rem; line-height:1.6;">
+                        ${(a.content || '').substring(0, 150)}...
+                    </p>
+                    <span style="color:#e94560; font-weight:600; font-size:0.85rem;">Читать далее →</span>
+                </div>
+            `).join('');
+        } catch(e) {
+            list.innerHTML = '<p style="color:red;">Ошибка загрузки</p>';
+        }
+    }
+
+    // ── Модальное окно: назначить рецензентов ──────────
+    async function openAssignModal(articleId, title) {
+        currentArticleId = articleId;
+        document.getElementById('assignModalTitle').textContent = title;
+        await loadReviewers();
+        fillReviewerSelects();
+        document.getElementById('assignModal').style.display = 'flex';
+    }
+
+    function closeAssignModal() {
+        document.getElementById('assignModal').style.display = 'none';
+        currentArticleId = null;
+    }
+
+    async function confirmAssignThree() {
+        const r1 = document.getElementById('reviewer1Select').value;
+        const r2 = document.getElementById('reviewer2Select').value;
+        const r3 = document.getElementById('reviewer3Select').value;
+
+        if (r1 === r2 || r1 === r3 || r2 === r3) {
+            alert('⚠️ Выберите трёх разных рецензентов!');
+            return;
+        }
+
+        try {
+            const res = await fetch(`${API}/chair/assign-three`, {
+                method: 'POST',
+                headers: hdrs(),
+                body: JSON.stringify({
+                    articleId: currentArticleId,
+                    reviewer1Id: parseInt(r1),
+                    reviewer2Id: parseInt(r2),
+                    reviewer3Id: parseInt(r3)
+                })
+            });
+            if (!res.ok) throw new Error('Ошибка назначения');
+            alert('✅ Три рецензента назначены! Данные автора скрыты.');
+            closeAssignModal();
+            loadPending();
+        } catch(e) {
+            alert('Ошибка: ' + e.message);
+        }
+    }
+
+    // ── Модальное окно: финальное решение ─────────────
+    // ИСПРАВЛЕНИЕ: используем ID статьи и берём данные из window._waitingData
+
+    function openDecisionModal(articleId) {
+        currentArticleId = articleId;
+        const data = window._waitingData[articleId];
+        if (!data) { alert('Ошибка: данные не найдены'); return; }
+
+        const { article, reviews } = data;
+        document.getElementById('decisionModalTitle').textContent = article.title;
+
+        // Показываем итоги рецензирования
+        document.getElementById('reviewsSummary').innerHTML = `
+            <div style="background:#f8f9fa; border-radius:10px; padding:1rem;">
+                <strong style="font-size:0.9rem; color:#333; display:block; margin-bottom:0.5rem;">
+                    Итоги рецензирования:
+                </strong>
+                ${reviews.map((r, i) => `
+                    <div style="display:flex; justify-content:space-between;
+                                padding:0.5rem 0; border-bottom:1px solid #eee;">
+                        <div>
+                            <span style="font-size:0.85rem; color:#555; font-weight:600;">
+                               👤 ${r.reviewer ? r.reviewer.name : 'Рецензент ' + (i+1)}
+                            </span>
+                            <p style="font-size:0.82rem; color:#888; margin:0.2rem 0 0;">
+                                ${r.comment || 'Без комментария'}
+                            </p>
+                        </div>
+                        <span class="badge ${getVerdictBadge(r.verdict)}" style="align-self:flex-start;">
+                            ${getVerdictText(r.verdict)}
+                        </span>
+                    </div>
+                `).join('')}
+
+            </div>
+        `;
+
+        document.getElementById('chairComment').value = '';
+        document.getElementById('decisionModal').style.display = 'flex';
+    }
+
+    function closeDecisionModal() {
+        document.getElementById('decisionModal').style.display = 'none';
+        currentArticleId = null;
+        currentReviews = [];
+    }
+
+    async function confirmDecision(decision) {
+        const comment = document.getElementById('chairComment').value.trim();
+        if (!comment) {
+            alert('⚠️ Напишите комментарий для автора');
+            return;
+        }
+
+        const actionMap = {
+            ACCEPTED: 'принять и опубликовать',
+            REVISION: 'отправить на доработку',
+            REJECTED: 'отклонить'
+        };
+        if (!confirm(`Вы уверены что хотите ${actionMap[decision]} эту статью?`)) return;
+
+        try {
+            const res = await fetch(`${API}/chair/decision`, {
+                method: 'POST',
+                headers: hdrs(),
+                body: JSON.stringify({
+                    articleId: currentArticleId,
+                    decision: decision,
+                    comment: comment
+                })
+            });
+
+            if (!res.ok) {
+                const err = await res.text();
+                throw new Error(err || 'Ошибка сервера');
+            }
+
+            const msgs = {
+                ACCEPTED: '✅ Статья принята и опубликована!',
+                REVISION: '✏️ Статья отправлена автору на доработку',
+                REJECTED: '❌ Статья отклонена'
+            };
+            alert(msgs[decision]);
+            closeDecisionModal();
+            loadWaitingDecision();
+        } catch(e) {
+            alert('Ошибка: ' + e.message);
+            console.error(e);
+        }
+    }
+
+    // ── Вспомогательные функции ────────────────────────
+    function getVerdictBadge(v) {
+        const map = { ACCEPTED:'badge-published', REVISION:'badge-pending', REJECTED:'badge-rejected' };
+        return map[v] || 'badge-pending';
+    }
+    function getVerdictText(v) {
+        const map = { ACCEPTED:'✅ Принять', REVISION:'✏️ Доработка', REJECTED:'❌ Отклонить' };
+        return map[v] || (v || 'Нет решения');
+    }
+    function getStatusColor(s) {
+        const map = { PENDING:'#f59e0b', UNDER_REVIEW:'#3b82f6', PUBLISHED:'#22c55e', REVISION:'#e94560', REJECTED:'#6b7280' };
+        return map[s] || '#e0e0e0';
+    }
+    function getStatusBadge(s) {
+        const map = { PENDING:'badge-pending', UNDER_REVIEW:'badge-review', PUBLISHED:'badge-published', REVISION:'badge-revision', REJECTED:'badge-rejected' };
+        return map[s] || '';
+    }
+    function getStatusText(s) {
+        const map = { PENDING:'⏳ Входящая', UNDER_REVIEW:'🔍 На рецензии', PUBLISHED:'✅ Опубликована', REVISION:'✏️ Доработка', REJECTED:'❌ Отклонена' };
+        return map[s] || s;
+    }
+
+    loadPending();
+</script>
+</body>
+</html>

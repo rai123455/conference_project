@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Опубликованные статьи — Journal</title>
+    <title>Опубликованные статьи — Conference KTMU</title>
     <link rel="stylesheet" href="css/style.css">
     <style>
         .article-card {
@@ -13,16 +13,13 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.08);
             margin-bottom: 1.5rem;
             transition: transform 0.2s;
+            cursor: pointer;
         }
         .article-card:hover {
             transform: translateY(-3px);
             box-shadow: 0 8px 25px rgba(0,0,0,0.12);
         }
-        .article-card h3 {
-            color: #1a1a2e;
-            font-size: 1.2rem;
-            margin-bottom: 0.5rem;
-        }
+        .article-card h3 { color: #1a1a2e; font-size: 1.2rem; margin-bottom: 0.5rem; }
         .topic-tag {
             background: #fff0f3;
             color: #e94560;
@@ -37,6 +34,9 @@
             color: #888;
             font-size: 0.85rem;
             margin-top: 0.8rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
         .hero {
             background: linear-gradient(135deg, #1a1a2e 0%, #0f3460 100%);
@@ -47,18 +47,27 @@
         }
         .hero h1 { font-size: 2rem; margin-bottom: 0.5rem; }
         .hero p { color: #aaa; }
-        .empty-state {
-            text-align: center;
-            padding: 4rem 2rem;
-            color: #888;
-        }
+        .empty-state { text-align: center; padding: 4rem 2rem; color: #888; }
         .empty-state .icon { font-size: 3rem; margin-bottom: 1rem; }
+        .pdf-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            color: #1e40af;
+            font-size: 0.78rem;
+            font-weight: 600;
+            padding: 0.2rem 0.7rem;
+            border-radius: 20px;
+            margin-left: 0.5rem;
+        }
     </style>
 </head>
 <body>
 
 <nav>
-    <a href="#" class="logo">📰 Journal</a>
+    <a href="#" class="logo">📰 Conference KTMU</a>
     <div class="nav-links">
         <a href="login.html">Войти</a>
         <a href="register.html" class="btn btn-primary" style="padding: 0.4rem 1rem;">Регистрация</a>
@@ -100,11 +109,16 @@
             }
 
             list.innerHTML = articles.map(a => `
-                <div class="article-card" onclick="openArticle(${a.id})" style="cursor:pointer;">
+                <div class="article-card" onclick="openArticle(${a.id})">
                     <span class="topic-tag">${a.topic || 'Без темы'}</span>
+                    ${a.filePath ? `<span class="pdf-badge">📄 PDF</span>` : ''}
                     <h3>${a.title}</h3>
-                    <p style="color:#555; line-height:1.7;">${a.content.substring(0, 200)}...</p>
-                    <div class="article-meta" style="display:flex; justify-content:space-between; align-items:center;">
+                    <p style="color:#555; line-height:1.7;">
+                        ${a.filePath
+                            ? 'Статья в формате PDF — нажмите чтобы открыть'
+                            : a.content.substring(0, 200) + '...'}
+                    </p>
+                    <div class="article-meta">
                         <span>✅ Автор: ${a.author.name}</span>
                         <span style="color:#e94560; font-weight:600;">Читать далее →</span>
                     </div>
@@ -118,48 +132,5 @@
 
     loadPublished();
 </script>
-<!--<script src="js/api.js"></script>-->
-<!--<script>-->
-<!--    async function loadPublished() {-->
-<!--        const list = document.getElementById('articlesList');-->
-
-<!--        try {-->
-<!--            const res = await fetch('http://localhost:8080/api/articles/published');-->
-<!--            const articles = await res.json();-->
-
-<!--            if (articles.length === 0) {-->
-<!--                list.innerHTML = `-->
-<!--                    <div class="empty-state">-->
-<!--                        <div class="icon">📭</div>-->
-<!--                        <p>Пока нет опубликованных статей</p>-->
-<!--                    </div>-->
-<!--                `;-->
-<!--                return;-->
-<!--            }-->
-
-<!--            list.innerHTML = articles.map(a => `-->
-<!--                <div class="article-card">-->
-<!--                    <span class="topic-tag">${a.topic || 'Без темы'}</span>-->
-<!--                    <h3>${a.title}</h3>-->
-<!--                    <p style="color:#555; line-height:1.7;">${a.content.substring(0, 300)}...</p>-->
-<!--                    <div class="article-meta">-->
-<!--                        ✅ Опубликовано · Автор: ${a.author.name}-->
-<!--                        <span>✅ Автор: ${a.author.name}</span>-->
-<!--                        <span style="color:#e94560; font-weight:600;">Читать далее →</span>-->
-<!--                    </div>-->
-<!--                </div>-->
-<!--            `).join('');-->
-
-<!--        } catch (e) {-->
-<!--            list.innerHTML = '<p style="color:red; text-align:center;">Ошибка загрузки статей</p>';-->
-<!--        }-->
-<!--    }-->
-
-<!--    loadPublished();-->
-
-<!--    function openArticle(id) {-->
-<!--    window.location.href = `article.html?id=${id}`;-->
-<!--}-->
-<!--</script>-->
 </body>
 </html>

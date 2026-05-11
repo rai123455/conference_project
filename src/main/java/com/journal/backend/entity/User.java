@@ -26,6 +26,12 @@ public class User {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
+    @Column
+    private String faculty;  // факультет председателя
+
+    public String getFaculty() { return faculty; }
+    public void setFaculty(String faculty) { this.faculty = faculty; }
+
     // Геттеры и сеттеры — IntelliJ генерирует сам:
     // правая кнопка → Generate → Getters and Setters
 
