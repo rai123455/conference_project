@@ -156,7 +156,7 @@
                     <h3>${a.title}</h3>
                     ${a.filePath ? `
 <!--                        <a href="http://localhost:8080/api/articles/${a.id}/file" target="_blank"-->
-                        <a href="${window.location.origin}/api" target="_blank"
+                        <a href="${window.location.origin}/api/articles/${a.id}/file" target="_blank"
                            style="display:inline-flex; align-items:center; gap:0.7rem; padding:0.8rem 1.5rem;
                                   background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px;
                                   color:#1e40af; font-weight:600; text-decoration:none; margin-bottom:1.2rem;">
@@ -199,7 +199,7 @@
         list.innerHTML = '<p style="color:#888;">Загрузка...</p>';
         try {
 <!--            const res = await fetch('http://localhost:8080/api/articles/published');-->
-            const res = await fetch('${window.location.origin}/api');
+            const res = await fetch('${window.location.origin}/api/articles/published');
             const articles = await res.json();
             if (articles.length === 0) {
                 list.innerHTML = '<p style="color:#888; text-align:center;">Нет опубликованных статей</p>';
