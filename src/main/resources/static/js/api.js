@@ -1,6 +1,5 @@
 // Адрес бэкенда — один раз здесь, везде используем
 //const API_URL = `${window.location.origin}/api`;
-
 const API_URL = 'https://conferenceproject-production.up.railway.app/api';
 //const API_URL = 'http://localhost:8080/api';
 //const API_URL = 'https://ВАШ_АДРЕС.up.railway.app/api';
