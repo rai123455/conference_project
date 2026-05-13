@@ -26,27 +26,39 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // ← добавь
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
-                // ... остальное без изменений
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // Открываем регистрацию и логин полностью
+
+                        // Статические файлы — открыты для всех
+                        .requestMatchers(
+                                "/", "/index.html", "/login.html", "/register.html",
+                                "/published.html", "/article.html",
+                                "/css/**", "/js/**",
+                                "/admin/**", "/author/**", "/reviewer/**", "/chair/**"
+                        ).permitAll()
+
+                        // API аутентификации
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/users/register").permitAll()
+
+                        // Публичные API
                         .requestMatchers("/api/articles/published").permitAll()
-                        .requestMatchers("/api/articles/*/file").permitAll()    // ← добавь
-                        .requestMatchers("/api/articles/upload").authenticated() // ← добавь
-                        .requestMatchers("/api/articles/author/**").authenticated()
+                        .requestMatchers("/api/articles/*/file").permitAll()
 
-                        .requestMatchers("/api/chair/**").hasRole("CHAIR") // для председателя
-
-                        // Защищённые эндпоинты по ролям
+                        // Роли
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/chair/**").hasRole("CHAIR")
                         .requestMatchers("/api/articles/submit-review").hasRole("REVIEWER")
 
-                        // Всё остальное требует авторизации
+                        // Авторизованные
+                        .requestMatchers("/api/articles/upload").authenticated()
+                        .requestMatchers("/api/articles/author/**").authenticated()
+                        .requestMatchers("/api/articles/*/resubmit-pdf").authenticated()
+
+                        // Всё остальное
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
@@ -54,8 +66,6 @@ public class SecurityConfig {
         return http.build();
     }
 
-    // BCrypt — алгоритм хеширования паролей
-    // Пароль "12345" → "$2a$10$xK8..." — обратно не расшифровать
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -72,5 +82,4 @@ public class SecurityConfig {
             registerCorsConfiguration("/**", config);
         }};
     }
-
 }
