@@ -95,7 +95,7 @@
         const list = document.getElementById('articlesList');
 
         try {
-            const res = await fetch('http://localhost:8080/api/articles/published');
+            const res = await fetch('${window.location.origin}/api/articles/published');
             const articles = await res.json();
 
             if (articles.length === 0) {
